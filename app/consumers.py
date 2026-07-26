@@ -1,0 +1,42 @@
+import json
+from channels.generic.websocket import AsyncWebsocketConsumer
+from redis.asyncio import Redis
+
+redis = Redis(host="127.0.0.1", port=6379, db=0, socket_timeout=None)
+
+
+class GameConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.room_name = self.scope['url_route']['kwargs']['room_name']
+        self.group_name = f"room_{self.room_name}"
+
+        await self.channel_layer.group_add(self.group_name, self.channel_name)
+        await redis.sadd(self.room_name, self.channel_name)
+
+        await self.accept()
+        await self.broadcast_online()
+
+    async def disconnect(self, code):
+        await self.channel_layer.group_discard(self.group_name, self.channel_name)
+        await redis.srem(self.room_name, self.channel_name)
+        await self.broadcast_online()
+
+    async def receive(self, text_data=None, bytes_data=None):
+        json_data = json.loads(text_data)
+
+        await self.channel_layer.group_send(
+            self.group_name,
+            {"type": "send.drawing", "payload": json_data},
+        )
+
+    async def send_drawing(self, event):
+        await self.send(json.dumps(event["payload"]))
+
+    async def broadcast_online(self):
+        count = await redis.scard(self.room_name)
+        await self.channel_layer.group_send(self.group_name, {"type": "show.online", "count": count})
+
+    async def show_online(self, event):
+        count = event["count"]
+
+        await self.send(json.dumps({"type": "online_count", "count": count}))

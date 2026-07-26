@@ -1,0 +1,30 @@
+/* Game room overrides — skribbl base is style.css */
+
+#game {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 8px;
+  margin-right: 8px;
+  min-height: 100vh;
+}
+
+.ad-1,
+.ad-2 {
+  display: none !important;
+}
+
+#game-players .player.drawing .avatar .drawing {
+  display: block;
+}
+
+#game-players .player .avatar .color {
+  background-image: none !important;
+  border-radius: 4px;
+}
+
+/* CHANGE: replace logo.gif in static/skribbl/img/ or update src in gameroom.html */
+#game-logo a img {
+  width: 320px;
+  height: auto;
+}

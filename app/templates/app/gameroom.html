@@ -1,0 +1,145 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Game Room</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inconsolata&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'skribbl/css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'skribbl/css/game.css' %}" />
+  </head>
+  <body translate="no">
+    <div id="game">
+      <div id="game-wrapper">
+        <div id="game-logo">
+          <!-- CHANGE: replace logo.gif with your own logo -->
+          <a href="/"><img src="{% static 'skribbl/img/logo.gif' %}" alt="Game logo" /></a>
+        </div>
+
+        <div id="game-bar">
+          <div id="game-settings" data-tooltip="Settings" data-tooltipdir="W">
+            <div class="icon"></div>
+          </div>
+          <div id="game-clock"><div class="text"></div></div>
+          <div id="game-round"><div class="text"></div></div>
+          <div id="game-word">
+            <div class="description">DRAW THIS</div>
+            <div class="word"></div>
+            <div class="hints"><div class="container"></div></div>
+          </div>
+        </div>
+
+        <div id="game-players">
+          <div class="players-list"></div>
+        </div>
+
+        <div id="game-players-footer"></div>
+
+        <div id="game-chat-input-mobile">
+          <form class="chat-form">
+            <input type="text" autocomplete="off" placeholder="Type your guess here..." maxlength="100" />
+            <div class="characters"></div>
+          </form>
+        </div>
+
+        <div id="game-canvas">
+          <canvas width="800" height="600"></canvas>
+          <div class="overlay"></div>
+          <div class="overlay-content">
+            <div class="text"></div>
+            <div class="words"></div>
+            <div class="reveal">
+              <p><span>The word was</span><span class="word"></span></p>
+              <div class="reason"></div>
+              <div class="player-container"></div>
+            </div>
+            <div class="result">
+              <div class="message">
+                <b class="winner-name"></b><span class="winner-text"></span>
+              </div>
+              <div class="podests">
+                <div class="podest-1"></div>
+                <div class="podest-2"></div>
+                <div class="podest-3"></div>
+              </div>
+              <div class="ranks"></div>
+            </div>
+            <div class="room">
+              <div class="group-settings">
+                <div class="key"><img src="{% static 'skribbl/img/setting_1.gif' %}" alt="" /><span>Players</span></div>
+                <div class="value"><select data-setting="1"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select></div>
+                <div class="key"><img src="{% static 'skribbl/img/setting_0.gif' %}" alt="" /><span>Language</span></div>
+                <div class="value"><select data-setting="0"><option value="0">English</option></select></div>
+                <div class="key"><img src="{% static 'skribbl/img/setting_2.gif' %}" alt="" /><span>Drawtime</span></div>
+                <div class="value"><select data-setting="2"><option>80</option><option>120</option></select></div>
+                <div class="key"><img src="{% static 'skribbl/img/setting_3.gif' %}" alt="" /><span>Rounds</span></div>
+                <div class="value"><select data-setting="3"><option>3</option><option>5</option></select></div>
+                <div class="key"><img src="{% static 'skribbl/img/setting_6.gif' %}" alt="" /><span>Game Mode</span></div>
+                <div class="value"><select data-setting="6"><option value="0">Normal</option></select></div>
+                <div class="key"><img src="{% static 'skribbl/img/setting_4.gif' %}" alt="" /><span>Word Count</span></div>
+                <div class="value"><select data-setting="4"><option>3</option></select></div>
+                <div class="key"><img src="{% static 'skribbl/img/setting_5.gif' %}" alt="" /><span>Hints</span></div>
+                <div class="value"><select data-setting="5"><option>2</option></select></div>
+              </div>
+              <div class="group-customwords">
+                <div class="game-room-name">
+                  <div>Custom words</div>
+                  <div class="game-room-checkbox">
+                    <label for="item-settings-customwordsonly">Use custom words only</label>
+                    <input id="item-settings-customwordsonly" type="checkbox" data-setting="7" />
+                  </div>
+                </div>
+                <textarea maxlength="20000" spellcheck="false" placeholder="Minimum of 10 words. 1-32 characters per word!"></textarea>
+              </div>
+              <div class="group-buttons">
+                <button id="button-start-game" type="button"><span>Start!</span></button>
+                <button id="button-invite" type="button"><img src="{% static 'skribbl/img/link.svg' %}" alt="" /><span>Invite</span></button>
+              </div>
+            </div>
+          </div>
+          <div id="game-rate">
+            <div class="like"></div>
+            <div class="dislike"></div>
+          </div>
+          <div class="bubbles"></div>
+        </div>
+
+        <div id="game-toolbar">
+          <div class="color-preview-mobile"></div>
+          <div class="color-preview">
+            <svg id="color-preview-primary" viewBox="0 0 1 1"><polygon points="0,0 0,1 1,1 1,0"></polygon></svg>
+            <svg id="color-preview-secondary" viewBox="0 0 1 1"><polygon points="0.85,0 1,0 1,1 0.15,1"></polygon></svg>
+          </div>
+          <div class="colors" data-tooltip="Left-/Rightclick to choose a color!" data-tooltipdir="S"></div>
+          <div class="sizes" data-tooltip="Click to change brush size!" data-tooltipdir="S">
+            <div class="size-preview clickable"><div class="icon"></div></div>
+            <div class="container"><div class="arrow"></div></div>
+          </div>
+          <div class="toolbar-group-tools"></div>
+          <div class="toolbar-group-actions"></div>
+        </div>
+
+        <div id="game-chat">
+          <div class="chat-content"></div>
+          <form class="chat-form">
+            <input type="text" autocomplete="off" placeholder="Type your guess here..." maxlength="100" />
+            <div class="characters"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div id="load"><div class="container"><div class="icon"><div class="graphic"></div></div></div></div>
+
+    {{ room_name|json_script:"room_name" }}
+    <script>
+      window.SKRIBBL_STATIC = "{% static 'skribbl/img/' %}";
+    </script>
+    <script src="{% static 'skribbl/js/gameroom.js' %}"></script>
+  </body>
+</html>
