@@ -14,31 +14,36 @@
   </head>
 
   <body class="bg-[#f1faee]">
-
-
-    <div class="flex justify-center items-center h-screen" >
-      <div class="flex flex-col  items-center gap-3 -translate-y-20">
-      <p class="h-10 w-150 text-center text-3xl">What game room would you like to enter?</p>
-      <input id="room-name-input" type="text" size="100" class="h-12 w-150 border-2 rounded-sm text-2xl border-[#1d3557] bg-[#457b9d] text-white p-3" />
-      <input id="room-name-submit" type="button" value="Enter" class="text-center h-10 w-30 border-2
-       text-amber-50 rounded-md  border-[#457b9d] bg-[#1d3557]" />
+    <div class="flex justify-center items-center h-screen">
+      <div class="flex flex-col items-center gap-3 -translate-y-20">
+        <p class="h-10 w-150 text-center text-3xl">Choose a name</p>
+        <input
+          id="username"
+          type="text"
+          size="100"
+          class="h-12 w-150 border-2 rounded-sm text-2xl border-[#1d3557] bg-[#457b9d] text-white p-3"
+        />
+        <input
+          id="submit"
+          type="button"
+          value="Enter"
+          class="text-center h-10 w-30 border-2 text-amber-50 rounded-md border-[#457b9d] bg-[#1d3557]"
+        />
       </div>
     </div>
 
-
-
     <script>
-      document.querySelector("#room-name-input").focus();
-      document.querySelector("#room-name-input").onkeyup = function (e) {
+      document.querySelector("#username").focus();
+      document.querySelector("#username").onkeyup = function (e) {
         if (e.key === "Enter") {
           // enter, return
-          document.querySelector("#room-name-submit").click();
+          document.querySelector("#submit").click();
         }
       };
-
-      document.querySelector("#room-name-submit").onclick = function (e) {
-        var roomName = document.querySelector("#room-name-input").value;
-        window.location.pathname = "/game/" + roomName + "/";
+      document.querySelector("#submit").onclick = function (e) {
+        const username = document.getElementById("username").value;
+        sessionStorage.setItem("username", username);
+        window.location.pathname = "/game/test/";
       };
     </script>
   </body>

@@ -1,16 +1,17 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from redis.asyncio import Redis
-
+from uuid import uuid4
 redis = Redis(host="127.0.0.1", port=6379, db=0, socket_timeout=None)
 
 
 class GameConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.room_name = self.scope['url_route']['kwargs']['room_name']
-        self.group_name = f"room_{self.room_name}"
+        self.matchmaker()
+        # self.room_name = self.scope['url_route']['kwargs']['room_name']
+        # self.group_name = f"room_{self.room_name}"
 
-        await self.channel_layer.group_add(self.group_name, self.channel_name)
+        # await self.channel_layer.group_add(self.group_name, self.channel_name)
         await redis.sadd(self.room_name, self.channel_name)
 
         await self.accept()
@@ -40,3 +41,23 @@ class GameConsumer(AsyncWebsocketConsumer):
         count = event["count"]
 
         await self.send(json.dumps({"type": "online_count", "count": count}))
+
+
+
+
+    async def matchmaker(self):
+        self.player = self.channel_name
+        rooms = await redis.smembers("rooms")
+
+
+        for room in rooms:
+            if await redis.scard(room) < 4:
+                await self.channel_layer.group_add(room, self.player)
+                await redis.sadd(room, self.player)
+                return 
+
+        new_room = uuid4().hex
+        await redis.sadd("rooms", new_room)
+        await self.channel_layer.group_add(new_room, self.player)
+        await redis.sadd(new_room, self.player)
+             
