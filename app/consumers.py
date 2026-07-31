@@ -1,63 +1,32 @@
 import json
+
+from app.game_manager.match_making import MatchMaker
 from channels.generic.websocket import AsyncWebsocketConsumer
-from redis.asyncio import Redis
 from uuid import uuid4
-redis = Redis(host="127.0.0.1", port=6379, db=0, socket_timeout=None)
 
 
 class GameConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.matchmaker()
-        # self.room_name = self.scope['url_route']['kwargs']['room_name']
-        # self.group_name = f"room_{self.room_name}"
-
-        # await self.channel_layer.group_add(self.group_name, self.channel_name)
-        await redis.sadd(self.room_name, self.channel_name)
-
         await self.accept()
-        await self.broadcast_online()
+        self.room = await MatchMaker.join(player=self.channel_name)
+        await self.channel_layer.group_add(self.room, self.player)
+        await self.game_starter()
 
     async def disconnect(self, code):
-        await self.channel_layer.group_discard(self.group_name, self.channel_name)
-        await redis.srem(self.room_name, self.channel_name)
-        await self.broadcast_online()
+        await MatchMaker.leave(player=self.channel_name, room=self.room)
+        await self.channel_layer.group_discard(self.room, self.channel_name)
 
     async def receive(self, text_data=None, bytes_data=None):
-        json_data = json.loads(text_data)
+        pass
 
-        await self.channel_layer.group_send(
-            self.group_name,
-            {"type": "send.drawing", "payload": json_data},
-        )
+    async def game_starter(self):
+        if await redis.scard(self.group) == 4:
+            await redis.set(f"{self.group}:round", 0)
+            await self.round_manager()
+        else:
+            return
 
-    async def send_drawing(self, event):
-        await self.send(json.dumps(event["payload"]))
-
-    async def broadcast_online(self):
-        count = await redis.scard(self.room_name)
-        await self.channel_layer.group_send(self.group_name, {"type": "show.online", "count": count})
-
-    async def show_online(self, event):
-        count = event["count"]
-
-        await self.send(json.dumps({"type": "online_count", "count": count}))
-
-
-
-
-    async def matchmaker(self):
-        self.player = self.channel_name
-        rooms = await redis.smembers("rooms")
-
-
-        for room in rooms:
-            if await redis.scard(room) < 4:
-                await self.channel_layer.group_add(room, self.player)
-                await redis.sadd(room, self.player)
-                return 
-
-        new_room = uuid4().hex
-        await redis.sadd("rooms", new_room)
-        await self.channel_layer.group_add(new_room, self.player)
-        await redis.sadd(new_room, self.player)
-             
+    async def round_manager(self):
+        await redis.incr(f"{self.group}:round")
+        self.round_number = int(await redis.get(f"{self.group}:round"))
+        await self.start_round()
