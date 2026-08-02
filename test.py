@@ -2,6 +2,8 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from redis.asyncio import Redis
 from uuid import uuid4
+
+from app.game_manager.game_manager import GameManager
 redis = Redis(host="127.0.0.1", port=6379, db=0, socket_timeout=None)
 
 
@@ -20,11 +22,12 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data=None, bytes_data=None):
         json_data = json.loads(text_data)
 
-        await self.channel_layer.group_send(
+        if json_data["type"] == "draw":
+            await self.channel_layer.group_send(
             self.group_name,
             {"type": "send.drawing", "payload": json_data},
         )
-
+        await GameManager.handle_draw(self.channel_layer, json_data)
     async def send_drawing(self, event):
         await self.send(json.dumps(event["payload"]))
 

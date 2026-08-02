@@ -535,7 +535,7 @@
     socket.onmessage = function (e) {
       const data = JSON.parse(e.data);
       if (data.type === "draw") {
-        drawLine(data);
+        drawLine(data.payload);
       } else if (data.type === "ui") {
         GameUI.handle(data);
       } else if (typeof GameUI[data.type] === "function") {

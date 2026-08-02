@@ -24,14 +24,14 @@ class GameManager:
             self.count_sccore()
             return
 
-        self.turn = self.player_turn_chooser()
+        self.turn = self.player_turn_manager()
 
         if self.turn == "next_round":
             self.round_manager()
 
         self.options = self.choose_random_word()
-        self.draw_handler()
-        self.guess_handler()  # if guess is currect go to player and set the points
+        # self.draw_handler()
+        # self.guess_handler()  # if guess is currect go to player and set the points
 
     async def round_manager(self):
         await redis.incr(f"{self.room}:round")
