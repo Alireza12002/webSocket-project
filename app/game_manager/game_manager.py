@@ -30,16 +30,16 @@ class GameManager:
             self.round_manager()
 
         self.options = self.choose_random_word()
-        # self.draw_handler()
-        # self.guess_handler()  # if guess is currect go to player and set the points
+        self.draw_handler()
+        # if guess is currect go to player and set the points
 
     async def round_manager(self):
         await redis.incr(f"{self.room}:round")
         self.start_round()
 
     async def player_turn_manager(self):
-        players = await redis.smembers(self.room)
-        for player in players:
+        self.players = await redis.smembers(self.room)
+        for player in self.players:
             if await redis.get(f"{player}:played") == None:
                 await redis.set(f"{player}:played", True)
                 return player
@@ -47,4 +47,10 @@ class GameManager:
 
     async def choose_random_word(self):
         options = random.sample(self.words, k=3)
+        await redis.set(f"{self.room}:words")
         return options
+
+    async def draw_handler(self):
+        await redis.set(f"{self.player}:drawing", True)
+
+    
