@@ -51,6 +51,11 @@ class GameManager:
         return options
 
     async def draw_handler(self):
-        await redis.set(f"{self.player}:drawing", True)
+        await redis.set(f"{self.turn}:drawing", True)
 
-    
+    async def final_sccore(self):
+        players = await redis.smembers(self.room)
+        sccores = {}
+        for player in players:
+            sccore = await redis.get(f"{player}:sccore")
+            sccores[player] = sccore

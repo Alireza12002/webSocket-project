@@ -78,6 +78,7 @@
   const overlayReveal = $("#game-canvas .overlay-content .reveal");
   const overlayResult = $("#game-canvas .overlay-content .result");
   const overlayRoom = $("#game-canvas .room");
+  const overlayScoreboard = $("#game-canvas .overlay-content .scoreboard");
   const playersList = $("#game-players .players-list");
   const chatContent = $("#game-chat .chat-content");
   const chatForms = $$("form.chat-form");
@@ -128,7 +129,9 @@
 
   function setFillPreview(index, isPrimary) {
     const color = rgb(COLORS[index]);
-    const id = isPrimary ? "#color-preview-primary" : "#color-preview-secondary";
+    const id = isPrimary
+      ? "#color-preview-primary"
+      : "#color-preview-secondary";
     $(id).style.fill = color;
     if (isPrimary) {
       $(".color-preview-mobile").style.backgroundColor = color;
@@ -371,6 +374,7 @@
       overlayReveal.classList.remove("show");
       overlayResult.classList.remove("show");
       overlayRoom.classList.remove("show");
+      overlayScoreboard.classList.remove("show");
 
       if (!data.show) return;
 
@@ -394,11 +398,36 @@
       } else if (mode === "result") {
         overlayResult.classList.add("show");
         if (data.winnerName != null) {
-          overlayResult.querySelector(".winner-name").textContent = data.winnerName;
+          overlayResult.querySelector(".winner-name").textContent =
+            data.winnerName;
         }
         if (data.winnerText != null) {
-          overlayResult.querySelector(".winner-text").textContent = data.winnerText;
+          overlayResult.querySelector(".winner-text").textContent =
+            data.winnerText;
         }
+      } else if (mode === "scoreboard") {
+        overlayScoreboard.classList.add("show");
+
+        const list = overlayScoreboard.querySelector(".players");
+
+        list.innerHTML = "";
+
+        (data.players || []).forEach((player, index) => {
+          const row = document.createElement("div");
+          row.className = "score-row";
+
+          row.innerHTML = `
+            <div class="rank">${index + 1}</div>
+            <div class="name">${player.name}</div>
+            <div class="score">${player.score}</div>
+        `;
+
+          list.appendChild(row);
+        });
+
+        const btn = overlayScoreboard.querySelector(".continue");
+
+        btn.style.display = data.showButton ? "" : "none";
       } else if (mode === "room") {
         overlayRoom.classList.add("show");
       }
@@ -410,7 +439,11 @@
       hintsContainer.innerHTML = "";
       if (data.hints && data.hints.length) {
         data.hints.forEach((hint) => {
-          const span = createEl("span", hint === "_" ? "hint" : "hint uncover", hint);
+          const span = createEl(
+            "span",
+            hint === "_" ? "hint" : "hint uncover",
+            hint,
+          );
           hintsContainer.appendChild(span);
         });
       }
@@ -449,7 +482,11 @@
         const info = createEl("div", "player-info");
         const name = createEl("div", "player-name", player.name || "Player");
         if (player.me) name.classList.add("me");
-        const score = createEl("div", "player-score", String(player.score != null ? player.score : 0));
+        const score = createEl(
+          "div",
+          "player-score",
+          String(player.score != null ? player.score : 0),
+        );
         info.appendChild(name);
         info.appendChild(score);
 
@@ -530,7 +567,9 @@
 
   function connectSocket(roomName) {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    socket = new WebSocket(protocol + "//" + window.location.host + "/ws/board/" + roomName + "/");
+    socket = new WebSocket(
+      protocol + "//" + window.location.host + "/ws/board/" + roomName + "/",
+    );
 
     socket.onmessage = function (e) {
       const data = JSON.parse(e.data);
