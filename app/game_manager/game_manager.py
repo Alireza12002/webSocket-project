@@ -1,6 +1,6 @@
+from app.game_manager.send_handler import SendManager
 from services.redis_config import redis
 import random
-
 class GameManager:
     words = ["Apple", "Bicycle", "Cactus", "Diamond", "Envelope",
              "Feather", "Guitar", "Helmet", "Igloo", "Jacket", "Map",
@@ -14,15 +14,17 @@ class GameManager:
              ]
 
     async def start_game(self, room):
+        if await redis.scard(room) != 4:
+            return
         self.room = room
         self.round = await redis.set(f"{room}:round", 1)
         self.round_number = int(await redis.get(f"{room}:round"))
+        await self.init_jobs()
         await self.start_round()
 
     async def start_round(self):
         if await redis.get(f"{self.room}:round") == 3:
-            self.count_sccore()
-            return
+            return # show sccores
 
         self.turn = self.player_turn_manager()
 
@@ -52,10 +54,10 @@ class GameManager:
 
     async def draw_handler(self):
         await redis.set(f"{self.turn}:drawing", True)
+        
+    async def init_jobs(self):
+        await SendManager.update_players(self.room)
+        await SendManager.set_round(self.room)
 
-    async def final_sccore(self):
-        players = await redis.smembers(self.room)
-        sccores = {}
-        for player in players:
-            sccore = await redis.get(f"{player}:sccore")
-            sccores[player] = sccore
+    async def init_player(player):
+        pass

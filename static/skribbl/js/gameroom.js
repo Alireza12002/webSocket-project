@@ -602,7 +602,7 @@
       connectSocket(roomName);
     }
 
-    GameUI.toolbar({ visible: true });
+    GameUI.toolbar({ visible: false });
     GameUI.rate({ visible: false });
     GameUI.guess_input({ enabled: true });
   }
