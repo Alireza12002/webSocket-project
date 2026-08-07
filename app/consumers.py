@@ -14,11 +14,8 @@ class GameConsumer(AsyncWebsocketConsumer):
         player_name = self.scope["session"].get("username")
         self.room = await MatchMaker.join(self.channel_name, player_name)
         await self.channel_layer.group_add(self.room, self.channel_name)
-        storage = Storage()
-        if storage.get_players(self.room) == 4:
-            game = GameManager()
-            await game.init_player(self.player)
-            await game.start_game(self.room)
+        game_manager = GameManager()
+        await game_manager.join_handler(self.room)
 
     async def disconnect(self, code):
         await MatchMaker.leave(player=self.player, room=self.room)

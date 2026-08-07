@@ -84,3 +84,10 @@ class Storage:
             return {}
         room = json.loads(data)
         return room["players"]
+
+    async def get_room(self, room_name):
+        room = json.loads(await redis.get(f"room:{room_name}"))
+        return room
+    async def save_room(self, room_name, data):
+        await redis.set(f"room:{room_name}", json.dumps(data))
+        
