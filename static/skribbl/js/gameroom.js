@@ -386,9 +386,24 @@
         overlayWords.classList.add("show");
         overlayWords.innerHTML = "";
         (data.words || []).forEach((word) => {
-          const btn = createEl("div", "word", word);
-          overlayWords.appendChild(btn);
+    const btn = createEl("div", "word", word);
+
+    btn.addEventListener("click", () => {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                type: "word_choice",
+                word: word
+            }));
+        }
+        // Optional: prevent selecting twice
+        overlayWords.querySelectorAll(".word").forEach(w => {
+            w.style.pointerEvents = "none";
         });
+        // Optional: hide the overlay
+        GameUI.overlay({ show: false });
+    });
+    overlayWords.appendChild(btn);
+});
       } else if (mode === "reveal") {
         overlayReveal.classList.add("show");
         overlayReveal.querySelector(".word").textContent = data.word || "";

@@ -1,8 +1,9 @@
-from app.game_manager.send_handler import SendManager
+from app.game_manager.send_handler import SendHandler, SendManager
 from app.game_manager.storage import Storage
 from services.redis_config import redis
 import random
 import json
+
 class GameManager:
     words = ["Apple", "Bicycle", "Cactus", "Diamond", "Envelope",
              "Feather", "Guitar", "Helmet", "Igloo", "Jacket", "Map",
@@ -15,7 +16,9 @@ class GameManager:
              "Drum", "Kite", "Lamp",  "Pencil",  "Telescope", "Umbrella"
              ]
     def __init__(self):
-        self.storage = Storage
+        self.storage = Storage()
+        self.send = SendHandler()
+
     async def join_handler(self, room):
         if len(await self.storage.get_players(room)) == 4:
             await self.start_game(room)
@@ -34,24 +37,27 @@ class GameManager:
         room["drawer"] = self.turn
         if self.turn == "next_round":
             self.round_manager()
-
-        self.options = self.choose_random_word()
-        self.draw_handler()
+        self.storage.save_room(self.room_name, room)
+        self.start_turn()
         # if guess is currect go to player and set the points
 
-    async def start_turn():
-        pass
-    async def round_manager(self):
-        await redis.incr(f"{self.room}:round")
-        self.start_round()
+    async def start_turn(self):
+        words = self.choose_random_word()
+        self.send.send_words(self.turn, words)
+        # findall of the jobs to start a drawing and then start it 
+        self.draw_handler()
+        self.handle_guess()
 
     async def player_turn_manager(self):
-        players = self.storage.get_players(self.room_name)
-        for player in players:
-            if await redis.get(f"{player}:played") == None:
-                await redis.set(f"{player}:played", True)
-                return player
-        return "next_round"
+        await self.storage.make_turn_order(self.room_name)
+        room = await self.storage.get_room(self.room_name)
+        room["turn_index"] += 1
+        turn = room["turn_order"][room["turn_index"]]
+        await self.storage.save_room(self.room_name, room)
+        if room["turn_index"] == 4:
+            self.storage.make_turn_order(self.room_name)
+            return "next_round"
+        return turn
 
     async def choose_random_word(self):
         options = random.sample(self.words, k=3)
@@ -59,11 +65,8 @@ class GameManager:
         return options
 
     async def draw_handler(self):
-        await redis.set(f"{self.turn}:drawing", True)
+        pass
         
     async def init_jobs(self):
         await SendManager.update_players(self.room)
         await SendManager.set_round(self.room)
-
-    async def init_player(player):
-        pass

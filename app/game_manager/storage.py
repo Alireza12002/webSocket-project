@@ -90,4 +90,10 @@ class Storage:
         return room
     async def save_room(self, room_name, data):
         await redis.set(f"room:{room_name}", json.dumps(data))
-        
+
+    async def make_turn_order(self, room_name):
+        room = self.get_room(room_name)
+        players = self.get_players(room_name)
+        room["turn_order"] = list(players.keys())
+        room["turn_index"] = -1
+        self.save_room(room_name, room)

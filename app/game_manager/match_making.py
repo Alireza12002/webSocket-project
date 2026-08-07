@@ -16,7 +16,7 @@ class MatchMaker():
 
         new_room = uuid4().hex
         storage.add_room(new_room)
-        await storage.add_player_to_the_room(channel_name, room, name)
+        await storage.add_player_to_the_room(channel_name, new_room, name)
         Storage.init_room(new_room)
         return new_room
     @staticmethod

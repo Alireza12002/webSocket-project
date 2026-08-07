@@ -25,13 +25,16 @@ class GameConsumer(AsyncWebsocketConsumer):
         json_data = json.loads(text_data)
         await ReceiveHandler.handle_message(json_data, self.channel_layer, self.player, self.room)
 
-
     async def send_drawing(self, event):
         await self.send(json.dumps({"type":"draw", "payload":event["payload"]}))
 
     async def send_guess(self, event):
         await self.send(json.dumps({"type":"ui", "action":"chat_add", "name":"ali", "text": event["guess"], "chat_type": "base"}))
 
-
     async def activate_toolbar(self):
         await self.send(json.dumps({"type": "ui", "action": "toolbar", "visible":True}))
+
+    async def send_words(self, event):
+        await self.send(json.dumps({"type":"ui", "action":"overlay", "show":True, "mode":"words", "words":event["words"]}))
+
+    
