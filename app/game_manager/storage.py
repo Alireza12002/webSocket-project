@@ -48,7 +48,7 @@ class Storage:
         "#9CCC65",  # Apple Green
     ]
 
-    async def init_room(room_name):
+    async def init_room(self, room_name):
         room = {
             "name": room_name,
             "round": 0,
@@ -59,17 +59,17 @@ class Storage:
         }
         await redis.set(f"room:{room_name}", json.dumps(room))
 
-    async def get_rooms():
-        return await redis.get("rooms")
+    async def get_rooms(self):
+        return await redis.smembers("rooms")
 
-    async def add_room(room_name):
-        await redis.set("rooms", room_name)
+    async def add_room(self, room_name):
+        await redis.sadd("rooms", room_name)
 
     async def add_player_to_the_room(self, channel_name, room_name, name):
         availabe = self.PLAYER_COLORS.copy()
-        color = random.choice(availabe)
+        color = random.choice(availabe) #each time make available wrong ❌
         availabe.remove(color)
-        room = json.loads(await redis.get(f"room:{room_name}"))
+        room = await self.get_room(room_name)
         room["players"][channel_name] = {
             "name": name,
             "score": 0,
@@ -77,32 +77,48 @@ class Storage:
             "guessed": False,
             "color":color
         }
+        await self.save_room(room_name, room)
 
-    async def get_players(room_name):
-        data = await redis.get(f"room:{room_name}")
-        if data is None:
+    async def get_players(self, room_name):
+        room = await self.get_room(room_name)
+        if room is None:
             return {}
-        room = json.loads(data)
+
         return room["players"]
 
     async def get_room(self, room_name):
-        room = json.loads(await redis.get(f"room:{room_name}"))
-        return room
+        room = await redis.get(f"room:{room_name}")
+        if room is None:
+            return None
+        return json.loads(room)
+    
     async def save_room(self, room_name, data):
         await redis.set(f"room:{room_name}", json.dumps(data))
 
     async def make_turn_order(self, room_name):
-        room = self.get_room(room_name)
-        players = self.get_players(room_name)
+        room = await self.get_room(room_name)
+        players = await self.get_players(room_name)
         room["turn_order"] = list(players.keys())
         room["turn_index"] = -1
-        self.save_room(room_name, room)
+        await self.save_room(room_name, room)
 
     async def set_choosed_word(self, room_name, word):
-        room = self.get_room(room_name)
+        room = await self.get_room(room_name)
         room["word"] = word
-        self.save_room(room_name, room)
+        await self.save_room(room_name, room)
 
     async def get_choosed_word(self, room_name):
-        room = self.get_room(room_name)
+        room = await self.get_room(room_name)
         return room["word"]
+
+    async def get_drawer(self, room_name):
+        room = await self.get_room(room_name)
+        return room["drawer"]
+
+    async def get_word(self, room_name):
+        room = await self.get_room(room_name)
+        return room["word"]
+
+    async def get_name(self, room_name, channel_name):
+        room = await self.get_room(room_name)
+        return room["players"][channel_name]["name"]

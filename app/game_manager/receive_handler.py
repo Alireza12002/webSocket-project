@@ -1,4 +1,5 @@
 import logging
+from app.game_manager.game_manager import GameManager
 from app.game_manager.storage import Storage
 from services.redis_config import redis
 
@@ -6,7 +7,9 @@ logger = logging.getLogger(__name__)
 class ReceiveHandler:
     def __init__(self):
         self.storage = Storage()
-    async def handle_message(message, channel_layer, player, room):
+        self.gamemanager = GameManager()
+
+    async def handle_message(self, message, channel_layer, player, room):
         if not isinstance(message, dict):
             return
 
@@ -22,24 +25,21 @@ class ReceiveHandler:
 
         await handler(message, channel_layer, player, room)
 
-    async def draw(message, channel_layer, player, room):
-        if await redis.get(f"{player}:drawing") == "True":
-            await channel_layer.group_send(
-                    room,
-                    {"type": "send.drawing", "payload": message},
-                )
+    async def draw(self, message, channel_layer, player, room):
+        if player == await self.storage.get_drawer(room):
+            await channel_layer.group_send(room,{"type": "send.drawing", "payload": message})
+
         logger.info(f"it is not your turn!{player}")
         
-    async def guess(message, channel_layer, player, room):
-        if await redis.get(f"{player}:drawing") == "True":
+    async def guess(self, message, channel_layer, player, room):
+        if player == await self.storage.get_drawer():
             logger.warning("you are drawer u cant guess!")
         guess = message.get("text")
-        
-        await channel_layer.group_send(
-            room, {"type": "send.guess", "guess": guess}
-        )
+        name = await self.storage.get_name(room, player)
+        await self.gamemanager.guess_handler(room, guess, name)
+     
 
     async def word_choice(self, message, channel_layer, player, room):
         word = message.get("word")
-        self.storage.set_choosed_word(room, word)
-        
+        await self.storage.set_choosed_word(room, word)
+        await self.gamemanager.receive_choice()
