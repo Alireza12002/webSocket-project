@@ -37,4 +37,17 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def send_words(self, event):
         await self.send(json.dumps({"type":"ui", "action":"overlay", "show":True, "mode":"words", "words":event["words"]}))
 
-    
+    async def overlay_off(self):
+        await self.send(json.dumps({"type":"ui", "action":"overlay", "show":False}))
+
+    async def turn_on_toolbar(self):
+        await self.send(json.dumps({"type":"ui", "action":"toolbar", "visible":True}))
+
+    async def clear_chat(self):
+        await self.send(json.dumps({"type":"ui", "action":"clear_chat"}))
+
+    async def choosed_word(self, event):
+        await self.send(json.dumps({"type":"ui", "action":"word", "description": event["description"], "word":event["word"]}))
+
+    async def overlay_wait(self, event):
+        await self.send(json.dumps({"type":"ui", "action":"overlay", "show": True, "mode": "text", "text":event["text"]}))

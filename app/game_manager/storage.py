@@ -97,3 +97,12 @@ class Storage:
         room["turn_order"] = list(players.keys())
         room["turn_index"] = -1
         self.save_room(room_name, room)
+
+    async def set_choosed_word(self, room_name, word):
+        room = self.get_room(room_name)
+        room["word"] = word
+        self.save_room(room_name, room)
+
+    async def get_choosed_word(self, room_name):
+        room = self.get_room(room_name)
+        return room["word"]

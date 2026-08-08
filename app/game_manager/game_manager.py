@@ -33,9 +33,9 @@ class GameManager:
         if room["round"] == 4:
             return # show sccores
         room["round"] += 1
-        self.turn = self.player_turn_manager() #make a new turn system
-        room["drawer"] = self.turn
-        if self.turn == "next_round":
+        self.drawer = self.player_turn_manager() #make a new turn system
+        room["drawer"] = self.drawer
+        if self.drawer == "next_round":
             self.round_manager()
         self.storage.save_room(self.room_name, room)
         self.start_turn()
@@ -43,10 +43,10 @@ class GameManager:
 
     async def start_turn(self):
         words = self.choose_random_word()
-        self.send.send_words(self.turn, words)
+        self.send.send_words(self.drawer, words)
         # findall of the jobs to start a drawing and then start it 
-        self.draw_handler()
-        self.handle_guess()
+        self.start_draw_handler()
+        self.start_guess_handler()
 
     async def player_turn_manager(self):
         await self.storage.make_turn_order(self.room_name)
@@ -64,9 +64,25 @@ class GameManager:
         await redis.set(f"{self.room}:words")
         return options
 
-    async def draw_handler(self):
-        pass
-        
+    async def start_draw_handler(self):
+        word = await self.storage.get_choosed_word(self.room_name)
+        players = await self.storage.get_players(self.room_name)
+        players = list(players.keys())
+        players = players.remove(self.drawer)
+        for player in players:
+            await self.send.overlay_wait(player, "Wait for drawer to choose...")
+        # init jobs for drawer
+        await self.send.overlay_off(self.drawer)
+        await self.send.turn_on_toolbar(self.drawer)
+        await self.send.choosed_word(self.drawer, word, "DRAW THIS")
+        # for all
+        await self.send.clear_chat(self.room_name)
+        # for gussers
+        for player in players:
+            await self.send.overlay_off(player)
+            word = '_'*len(word)
+            await self.send.choosed_word(player, word, "GUESS THIS")
+            
     async def init_jobs(self):
         await SendManager.update_players(self.room)
         await SendManager.set_round(self.room)
