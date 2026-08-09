@@ -21,10 +21,13 @@ class GameManager:
         self.send = SendHandler()
 
     async def join_handler(self, room):
+        await self.update_players(room)
+        print(f"{room} game started players{await self.storage.get_players(room)}")
         if len(await self.storage.get_players(room)) == 4:
             await self.start_game(room)
 
     async def start_game(self, room_name):
+        await self.update_players(room_name)
         self.room_name = room_name
         #await self.init_jobs()
         await self.start_round()
@@ -51,7 +54,7 @@ class GameManager:
         await self.send.send_words(self.drawer, words)
         
         await self.word_event.wait()
-        await self.word_event.clear()
+        self.word_event.clear()
         # findall of the jobs to start a drawing and then start it 
         await self.start_draw_handler()
 
@@ -100,7 +103,7 @@ class GameManager:
     async def check_all_guess(self):
         players = await self.storage.get_players(self.room_name)
         counter = 0
-        for player in players:
+        for player in players.values():
             if player["guessed"] == True:
                 counter += 1
         if counter == 3:
@@ -110,7 +113,17 @@ class GameManager:
         await self.start_turn()
 
     async def receive_choice(self):
-        await self.word_event.set()
+        self.word_event.set()
 
     async def init_jobs(self):
         pass
+
+    async def update_players(self, room_name):
+        room = await self.storage.get_room(room_name)
+        players = room["players"]  # Keep as dict with channel_name keys
+        await self.send.send_players(room_name, players)
+
+    async def handle_leave(self, room_name):
+        await self.update_players(room_name)
+
+

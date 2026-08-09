@@ -1,14 +1,26 @@
 from channels.layers import get_channel_layer
 from board.settings import CHANNEL_LAYERS
+from app.game_manager.storage import Storage
 
 class SendHandler():
     channel_layer = get_channel_layer()
 
     async def send_players(self, room_name, players):
-        await self.channel_layer.group_send(room_name, {"type":"send_players", "players":players})
+        # Send to each player individually to avoid race condition with group_add
+        # players is a dict {channel_name: player_info}, extract values for the UI
+        players_list = list(players.values())
+        for channel_name in players:
+            await self.channel_layer.send(channel_name, {"type":"send_players", "players":players_list})
 
     async def set_round(self, room_name, round):
-        await self.channel_layer.group_send(room_name, {"type":"set_round", "round":round})
+        # Send to each player individually to avoid race condition with group_add
+        room = await Storage().get_room(room_name)
+        if room and "players" in room:
+            for channel_name in room["players"]:
+                await self.channel_layer.send(channel_name, {"type":"set_round", "round":round})
+        else:
+            # Fallback to group_send if no room data
+            await self.channel_layer.group_send(room_name, {"type":"set_round", "round":round})
         
     async def send_words(self, drawer, words):
         await self.channel_layer.send(drawer, {"type": "send_words", "words":words})

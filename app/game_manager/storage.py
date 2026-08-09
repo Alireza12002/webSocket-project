@@ -67,15 +67,15 @@ class Storage:
 
     async def add_player_to_the_room(self, channel_name, room_name, name):
         availabe = self.PLAYER_COLORS.copy()
-        color = random.choice(availabe) #each time make available wrong ❌
+        color = random.choice(availabe)
         availabe.remove(color)
         room = await self.get_room(room_name)
         room["players"][channel_name] = {
-            "name": name,
+            "name": name or "Player",
             "score": 0,
             "drawing": False,
             "guessed": False,
-            "color":color
+            "color": color
         }
         await self.save_room(room_name, room)
 

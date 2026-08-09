@@ -14,9 +14,9 @@ class ReceiveHandler:
             return
 
         handlers = {
-            "draw": ReceiveHandler.draw,
-            "guess": ReceiveHandler.guess,
-            "word_choice": ReceiveHandler.word_choice,
+            "draw": self.draw,
+            "guess": self.guess,
+            "word_choice": self.word_choice,
         }
 
         handler = handlers.get(message.get("type"))
@@ -43,3 +43,6 @@ class ReceiveHandler:
         word = message.get("word")
         await self.storage.set_choosed_word(room, word)
         await self.gamemanager.receive_choice()
+
+
+    
