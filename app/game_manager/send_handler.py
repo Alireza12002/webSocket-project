@@ -7,9 +7,17 @@ class SendHandler():
 
     async def send_players(self, room_name, players):
         # Send to each player individually to avoid race condition with group_add
-        # players is a dict {channel_name: player_info}, extract values for the UI
-        players_list = list(players.values())
+        # players is a dict {channel_name: player_info}.
+        # Each recipient needs its own copy of the list, because the entry that
+        # belongs to that recipient must be flagged with "me": True. The client
+        # uses that flag to decide whether it is the drawer (see gameroom.js
+        # GameUI.players -> setDrawingEnabled). Without it every client thinks
+        # it is not the drawer and drawing stays disabled for everyone.
         for channel_name in players:
+            players_list = [
+                {**info, "me": other_channel == channel_name}
+                for other_channel, info in players.items()
+            ]
             await self.channel_layer.send(channel_name, {"type":"send_players", "players":players_list})
 
     async def set_round(self, room_name, round):

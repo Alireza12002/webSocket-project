@@ -20,16 +20,14 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.room = await self.match_maker.join(self.channel_name, player_name)
         session = self.scope["session"]
         await self.channel_layer.group_add(self.room, self.channel_name)
-
-        print("JOINED GROUP")
-        print("ROOM:", self.room)
-        print("CHANNEL:", self.channel_name)
         await self.game_manager.join_handler(self.room)
 
     async def disconnect(self, code):# need to work  
         await self.channel_layer.group_discard(self.room, self.channel_name)
         await self.match_maker.leave(player=self.channel_name, room_name=self.room)
         await self.game_manager.handle_leave(self.room,)
+
+
     async def receive(self, text_data=None, bytes_data=None):
         json_data = json.loads(text_data)
         await self.receive_handler.handle_message(json_data, self.channel_layer, self.channel_name, self.room)
@@ -46,13 +44,13 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def send_words(self, event):
         await self.send(json.dumps({"type":"ui", "action":"overlay", "show":True, "mode":"words", "words":event["words"]}))
 
-    async def overlay_off(self):
+    async def overlay_off(self, event):
         await self.send(json.dumps({"type":"ui", "action":"overlay", "show":False}))
 
-    async def turn_on_toolbar(self):
+    async def turn_on_toolbar(self, event):
         await self.send(json.dumps({"type":"ui", "action":"toolbar", "visible":True}))
 
-    async def clear_chat(self):
+    async def clear_chat(self, event):
         await self.send(json.dumps({"type":"ui", "action":"clear_chat"}))
 
     async def choosed_word(self, event):
@@ -68,7 +66,6 @@ class GameConsumer(AsyncWebsocketConsumer):
         await self.send(json.dumps({"type":"ui", "action":"chat_add", "name":event["name"],"text":event["text"], "chatType":"base"}))
 
     async def send_players(self, event):
-        print("CHANNEL:", self.channel_name)
         await self.send(json.dumps({"type":"ui", "action":"players", "players": event["players"]}))
 
     async def set_round(self, event):

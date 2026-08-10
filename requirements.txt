@@ -1,7 +1,7 @@
-Django==5.1.7
+Django==6.0.7
 channels==4.3.2
 channels-redis==4.3.0
-daphne==4.3.0
+daphne==4.2.3
 django-tailwind==4.5.0
 django-browser-reload==1.21.0
 djangorestframework==3.17.1

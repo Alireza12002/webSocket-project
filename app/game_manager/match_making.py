@@ -25,4 +25,4 @@ class MatchMaker():
     async def leave(self, player, room_name):
         room = await self.storage.get_room(room_name)
         room["players"].pop(player)
-        self.storage.save_room(room_name, room)
+        await self.storage.save_room(room_name, room)

@@ -3666,3 +3666,16 @@ html[data-halloween] #game-logo a img {
 
     height:42px;
 }
+
+/* Allow mouse clicks to pass straight through overlays to the canvas underneath */
+#game-canvas .overlay,
+#game-canvas .overlay-content {
+  pointer-events: none;
+}
+
+/* Re-enable clicks ONLY on actual buttons/words inside the overlay */
+#game-canvas .overlay-content.show,
+#game-canvas .overlay-content .words .word,
+#game-canvas .overlay-content button {
+  pointer-events: auto;
+}
