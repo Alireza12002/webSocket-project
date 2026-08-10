@@ -70,3 +70,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def set_round(self, event):
         await self.send(json.dumps({"type":"ui", "action":"round", "text":f"round {event["round"]} of 3"}))
+
+    async def clear_canvas(self, event):
+        await self.send(json.dumps({"type":"clear"}))

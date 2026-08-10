@@ -53,3 +53,6 @@ class SendHandler():
 
     async def base_chat(self, room_name, name, text):
         await self.channel_layer.group_send(room_name, {"type":"base_chat", "name":name, "text":text})
+
+    async def clear_canvas(self, room_name):
+        await self.channel_layer.group_send(room_name, {"type": "clear_canvas"})

@@ -38,6 +38,7 @@ class GameManager:
         await self.start_round(room_name)
 
     async def start_round(self, room_name):
+        await self.storage.make_turn_order(room_name)
         room = await self.storage.get_room(room_name)
         if room["round"] == 4:
             return # show sccores
@@ -48,17 +49,18 @@ class GameManager:
         # if guess is currect go to player and set the points
 
     async def start_turn(self, room_name):
-
+        await self.clear_canvas(room_name)
         drawer = await self.player_turn_manager(room_name) 
 
         if drawer == "next_round":
-            await self.start_round()
+            await self.start_round(room_name)
             return
         
         players = await self.storage.get_players(room_name)
         room = await self.storage.get_room(room_name)   
         for player in players:
             room["players"][player]["drawing"] = False
+            room["players"][player]["guessed"] = False
 
      
         room["drawer"] = drawer
@@ -76,13 +78,15 @@ class GameManager:
                 await self.send.overlay_wait(player, "Wait for drawer to choose...")
       
     async def player_turn_manager(self, room_name):
-        await self.storage.make_turn_order(room_name)
+        # await self.storage.make_turn_order(room_name)
         room = await self.storage.get_room(room_name)
         room["turn_index"] += 1
-        turn = room["turn_order"][room["turn_index"]]
+
         if room["turn_index"] == 4:
             await self.storage.make_turn_order(room_name)
             return "next_round"
+
+        turn = room["turn_order"][room["turn_index"]]        
         await self.storage.save_room(room_name, room)
         return turn
 
@@ -112,13 +116,18 @@ class GameManager:
             word = '_'*len(word)
             await self.send.choosed_word(player, word, "GUESS THIS")
 
-    async def guess_handler(self, room_name, guess, name):
+    async def guess_handler(self, room_name, guess, name, channel_name):
         word = await self.storage.get_word(room_name)
         if guess == word:
             await self.send.currect_guess(room_name, name)
+            room = await self.storage.get_room(room_name)
+            room["players"][channel_name]["guessed"] = True
+            await self.storage.save_room(room_name, room)
+            await self.check_all_guess(room_name)
+            return
             #true guessed
         await self.send.base_chat(room_name, name, guess)
-        await self.check_all_guess(room_name)
+        
 
     async def check_all_guess(self, room_name):
         players = await self.storage.get_players(room_name)
@@ -127,7 +136,7 @@ class GameManager:
             if player["guessed"] == True:
                 counter += 1
         if counter == 3:
-            await self.start_turn()
+            await self.start_turn(room_name)
 
     async def update_players(self, room_name):
         room = await self.storage.get_room(room_name)
@@ -137,4 +146,5 @@ class GameManager:
     async def handle_leave(self, room_name):
         await self.update_players(room_name)
 
-
+    async def clear_canvas(self, room_name):
+        await self.send.clear_canvas(room_name)

@@ -93,7 +93,7 @@
   const loadEl = $("#load");
 
   let primaryColorIndex = 1;
-  let secondaryColorIndex = 0;
+  // let secondaryColorIndex = 0;
   let brushSizeIndex = 0;
   let selectedTool = null;
 
@@ -127,9 +127,7 @@
     const el = document.createElement(tag);
 
     if (className) {
-      className
-        .split(" ")
-        .forEach((c) => el.classList.add(c));
+      className.split(" ").forEach((c) => el.classList.add(c));
     }
 
     if (text != null) {
@@ -139,40 +137,37 @@
     return el;
   }
 
-  function setFillPreview(index, isPrimary) {
-    const color = rgb(COLORS[index]);
+  // function setFillPreview(index, isPrimary) {
+  //   const color = rgb(COLORS[index]);
 
-    const id = isPrimary
-      ? "#color-preview-primary"
-      : "#color-preview-secondary";
+  //   const id = isPrimary
+  //     ? "#color-preview-primary"
+  //     : "#color-preview-secondary";
 
-    const preview = $(id);
+  //   const preview = $(id);
 
-    if (preview) {
-      preview.style.fill = color;
-    }
+  //   if (preview) {
+  //     preview.style.fill = color;
+  //   }
 
-    if (isPrimary) {
-      const mobilePreview = $(".color-preview-mobile");
+  //   if (isPrimary) {
+  //     const mobilePreview = $(".color-preview-mobile");
 
-      if (mobilePreview) {
-        mobilePreview.style.backgroundColor = color;
-      }
-    }
-  }
+  //     if (mobilePreview) {
+  //       mobilePreview.style.backgroundColor = color;
+  //     }
+  //   }
+  // }
 
   function updateActiveColor() {
     const active = primaryColorIndex;
 
     $$("#game-toolbar .colors .color").forEach((el) => {
-      el.classList.toggle(
-        "selected",
-        Number(el.dataset.index) === active
-      );
+      el.classList.toggle("selected", Number(el.dataset.index) === active);
     });
 
-    setFillPreview(primaryColorIndex, true);
-    setFillPreview(secondaryColorIndex, false);
+    // setFillPreview(primaryColorIndex, true);
+    // setFillPreview(secondaryColorIndex, false);
   }
 
   function initColors() {
@@ -190,39 +185,54 @@
     updateActiveColor();
   }
 
+  // function makeColorSwatch(index) {
+  //   const el = createEl("div", "color");
+
+  //   el.style.backgroundColor = rgb(COLORS[index]);
+  //   el.dataset.index = String(index);
+
+  //   el.addEventListener("click", (e) => {
+  //     if (e.button === 2) return;
+
+  //     primaryColorIndex = index;
+  //     updateActiveColor();
+  //   });
+
+  //   el.addEventListener("contextmenu", (e) => {
+  //     e.preventDefault();
+
+  //     secondaryColorIndex = index;
+  //     updateActiveColor();
+  //   });
+
+  //   return el;
+  // }
   function makeColorSwatch(index) {
     const el = createEl("div", "color");
 
     el.style.backgroundColor = rgb(COLORS[index]);
     el.dataset.index = String(index);
 
-    el.addEventListener("click", (e) => {
-      if (e.button === 2) return;
-
+    el.addEventListener("click", () => {
       primaryColorIndex = index;
-      updateActiveColor();
-    });
-
-    el.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
-
-      secondaryColorIndex = index;
       updateActiveColor();
     });
 
     return el;
   }
+  function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    applyContextDefaults();
+  }
   function initSizes() {
     BRUSH_SIZES.forEach((size, id) => {
       const el = createEl("div", "size clickable");
       const icon = createEl("div", "icon");
 
-      icon.style.backgroundImage =
-        "url(" + imgUrl("size.gif") + ")";
+      icon.style.backgroundImage = "url(" + imgUrl("size.gif") + ")";
 
-      icon.style.backgroundSize =
-        sizeIconPercent(size) + "%";
+      icon.style.backgroundSize = sizeIconPercent(size) + "%";
 
       el.appendChild(icon);
       el.dataset.index = String(id);
@@ -254,17 +264,12 @@
 
     const icon = sizePreview.querySelector(".icon");
 
-    icon.style.backgroundImage =
-      "url(" + imgUrl("size.gif") + ")";
+    icon.style.backgroundImage = "url(" + imgUrl("size.gif") + ")";
 
-    icon.style.backgroundSize =
-      sizeIconPercent(size) + "%";
+    icon.style.backgroundSize = sizeIconPercent(size) + "%";
 
     $$("#game-toolbar .sizes .size").forEach((el) => {
-      el.classList.toggle(
-        "selected",
-        Number(el.dataset.index) === id
-      );
+      el.classList.toggle("selected", Number(el.dataset.index) === id);
     });
 
     sizesContainer.classList.remove("open");
@@ -275,8 +280,7 @@
     const icon = createEl("div", "icon");
     const key = createEl("div", "key", opts.keydef);
 
-    icon.style.backgroundImage =
-      "url(" + imgUrl(opts.graphic) + ")";
+    icon.style.backgroundImage = "url(" + imgUrl(opts.graphic) + ")";
 
     el.appendChild(icon);
     el.appendChild(key);
@@ -308,6 +312,56 @@
     return el;
   }
 
+  // function initTools() {
+  //   const brush = makeTool(0, {
+  //     isAction: false,
+  //     name: "Brush",
+  //     keydef: "B",
+  //     graphic: "pen.gif",
+  //   });
+
+  //   const fill = makeTool(1, {
+  //     isAction: false,
+  //     name: "Fill",
+  //     keydef: "F",
+  //     graphic: "fill.gif",
+  //   });
+
+  //   const undo = makeTool(2, {
+  //     isAction: true,
+  //     name: "Undo",
+  //     keydef: "U",
+  //     graphic: "undo.gif",
+  //     action: function () {},
+  //   });
+
+  //   const clear = makeTool(3, {
+  //     isAction: true,
+  //     name: "Clear",
+  //     keydef: "C",
+  //     graphic: "clear.gif",
+
+  //     action: function () {
+  //       // Only drawer should be able to clear.
+  //       if (!canDraw) return;
+
+  //       ctx.clearRect(
+  //         0,
+  //         0,
+  //         canvas.width,
+  //         canvas.height
+  //       );
+  //     },
+  //   });
+
+  //   toolsGroup.appendChild(brush);
+  //   toolsGroup.appendChild(fill);
+  //   actionsGroup.appendChild(undo);
+  //   actionsGroup.appendChild(clear);
+
+  //   brush.classList.add("selected");
+  //   selectedTool = 0;
+  // }
   function initTools() {
     const brush = makeTool(0, {
       isAction: false,
@@ -316,49 +370,34 @@
       graphic: "pen.gif",
     });
 
-    const fill = makeTool(1, {
-      isAction: false,
-      name: "Fill",
-      keydef: "F",
-      graphic: "fill.gif",
-    });
-
-    const undo = makeTool(2, {
-      isAction: true,
-      name: "Undo",
-      keydef: "U",
-      graphic: "undo.gif",
-      action: function () {},
-    });
-
-    const clear = makeTool(3, {
+    const clear = makeTool(1, {
       isAction: true,
       name: "Clear",
       keydef: "C",
       graphic: "clear.gif",
 
       action: function () {
-        // Only drawer should be able to clear.
-        if (!canDraw) return;
+        // Only the drawer can request a clear.
+        if (!canDraw) {
+          return;
+        }
 
-        ctx.clearRect(
-          0,
-          0,
-          canvas.width,
-          canvas.height
-        );
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          socket.send(
+            JSON.stringify({
+              type: "clear",
+            }),
+          );
+        }
       },
     });
 
     toolsGroup.appendChild(brush);
-    toolsGroup.appendChild(fill);
-    actionsGroup.appendChild(undo);
     actionsGroup.appendChild(clear);
 
     brush.classList.add("selected");
     selectedTool = 0;
   }
-
   /*
    * The canvas bitmap is a FIXED 800x600 and is never reassigned after
    * init. CSS alone scales it to fit the container.
@@ -512,10 +551,7 @@
       /*
        * Send drawing operation to backend.
        */
-      if (
-        socket &&
-        socket.readyState === WebSocket.OPEN
-      ) {
+      if (socket && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify(data));
       }
 
@@ -530,15 +566,11 @@
       const counter = form.querySelector(".characters");
 
       input.addEventListener("input", () => {
-        const left =
-          input.maxLength - input.value.length;
+        const left = input.maxLength - input.value.length;
 
         counter.textContent = left;
 
-        counter.classList.toggle(
-          "visible",
-          input.value.length > 0
-        );
+        counter.classList.toggle("visible", input.value.length > 0);
       });
 
       form.addEventListener("submit", (e) => {
@@ -550,15 +582,12 @@
           return;
         }
 
-        if (
-          socket &&
-          socket.readyState === WebSocket.OPEN
-        ) {
+        if (socket && socket.readyState === WebSocket.OPEN) {
           socket.send(
             JSON.stringify({
               type: "guess",
               text: text,
-            })
+            }),
           );
         }
 
@@ -575,10 +604,7 @@
      * This DOES NOT give drawing permission.
      */
     toolbar(data) {
-      wrapper.classList.toggle(
-        "toolbar-hidden",
-        !data.visible
-      );
+      wrapper.classList.toggle("toolbar-hidden", !data.visible);
 
       GameUI.rate({
         visible: data.visible,
@@ -613,10 +639,7 @@
     },
 
     overlay(data) {
-      overlay.classList.toggle(
-        "show",
-        !!data.show
-      );
+      overlay.classList.toggle("show", !!data.show);
 
       overlayText.classList.remove("show");
       overlayWords.classList.remove("show");
@@ -634,38 +657,28 @@
       if (mode === "text") {
         overlayText.classList.add("show");
         overlayText.textContent = data.text || "";
-
       } else if (mode === "words") {
         overlayWords.classList.add("show");
         overlayWords.innerHTML = "";
 
         (data.words || []).forEach((word) => {
-          const btn = createEl(
-            "div",
-            "word",
-            word
-          );
+          const btn = createEl("div", "word", word);
 
           btn.addEventListener("click", () => {
-            if (
-              socket &&
-              socket.readyState === WebSocket.OPEN
-            ) {
+            if (socket && socket.readyState === WebSocket.OPEN) {
               socket.send(
                 JSON.stringify({
                   type: "word_choice",
                   word: word,
-                })
+                }),
               );
             }
 
             setDrawingEnabled(true);
 
-            overlayWords
-              .querySelectorAll(".word")
-              .forEach((w) => {
-                w.style.pointerEvents = "none";
-              });
+            overlayWords.querySelectorAll(".word").forEach((w) => {
+              w.style.pointerEvents = "none";
+            });
 
             GameUI.overlay({
               show: false,
@@ -674,73 +687,52 @@
 
           overlayWords.appendChild(btn);
         });
-
       } else if (mode === "reveal") {
         overlayReveal.classList.add("show");
 
-        overlayReveal.querySelector(
-          ".word"
-        ).textContent = data.word || "";
+        overlayReveal.querySelector(".word").textContent = data.word || "";
 
-        const reason =
-          overlayReveal.querySelector(".reason");
+        const reason = overlayReveal.querySelector(".reason");
 
         reason.textContent = data.reason || "";
 
-        reason.style.display = data.reason
-          ? "block"
-          : "none";
-
+        reason.style.display = data.reason ? "block" : "none";
       } else if (mode === "result") {
         overlayResult.classList.add("show");
 
         if (data.winnerName != null) {
-          overlayResult.querySelector(
-            ".winner-name"
-          ).textContent = data.winnerName;
+          overlayResult.querySelector(".winner-name").textContent =
+            data.winnerName;
         }
 
         if (data.winnerText != null) {
-          overlayResult.querySelector(
-            ".winner-text"
-          ).textContent = data.winnerText;
+          overlayResult.querySelector(".winner-text").textContent =
+            data.winnerText;
         }
-
       } else if (mode === "scoreboard") {
         overlayScoreboard.classList.add("show");
 
-        const list =
-          overlayScoreboard.querySelector(
-            ".players"
-          );
+        const list = overlayScoreboard.querySelector(".players");
 
         list.innerHTML = "";
 
-        (data.players || []).forEach(
-          (player, index) => {
-            const row =
-              document.createElement("div");
+        (data.players || []).forEach((player, index) => {
+          const row = document.createElement("div");
 
-            row.className = "score-row";
+          row.className = "score-row";
 
-            row.innerHTML = `
+          row.innerHTML = `
               <div class="rank">${index + 1}</div>
               <div class="name">${player.name}</div>
               <div class="score">${player.score}</div>
             `;
 
-            list.appendChild(row);
-          }
-        );
+          list.appendChild(row);
+        });
 
-        const btn =
-          overlayScoreboard.querySelector(
-            ".continue"
-          );
+        const btn = overlayScoreboard.querySelector(".continue");
 
-        btn.style.display =
-          data.showButton ? "" : "none";
-
+        btn.style.display = data.showButton ? "" : "none";
       } else if (mode === "room") {
         overlayRoom.classList.add("show");
       }
@@ -748,8 +740,7 @@
 
     word(data) {
       if (data.description != null) {
-        wordDescEl.textContent =
-          data.description;
+        wordDescEl.textContent = data.description;
       }
 
       if (data.word != null) {
@@ -758,17 +749,12 @@
 
       hintsContainer.innerHTML = "";
 
-      if (
-        data.hints &&
-        data.hints.length
-      ) {
+      if (data.hints && data.hints.length) {
         data.hints.forEach((hint) => {
           const span = createEl(
             "span",
-            hint === "_"
-              ? "hint"
-              : "hint uncover",
-            hint
+            hint === "_" ? "hint" : "hint uncover",
+            hint,
           );
 
           hintsContainer.appendChild(span);
@@ -776,36 +762,26 @@
       }
 
       if (data.wordLength != null) {
-        const len = createEl(
-          "span",
-          "word-length",
-          data.wordLength
-        );
+        const len = createEl("span", "word-length", data.wordLength);
 
         hintsContainer.appendChild(len);
       }
     },
 
     clock(data) {
-      clockEl.textContent =
-        data.time != null
-          ? String(data.time)
-          : "";
+      clockEl.textContent = data.time != null ? String(data.time) : "";
 
       if (data.animate) {
-        $("#game-clock").style.animationName =
-          "none";
+        $("#game-clock").style.animationName = "none";
 
         void $("#game-clock").offsetWidth;
 
-        $("#game-clock").style.animationName =
-          "";
+        $("#game-clock").style.animationName = "";
       }
     },
 
     round(data) {
-      roundEl.textContent =
-        data.text || "";
+      roundEl.textContent = data.text || "";
     },
 
     players(data) {
@@ -828,23 +804,16 @@
        * => canDraw = true
        */
 
-      const me = list.find(
-        (player) => player.me
-      );
+      const me = list.find((player) => player.me);
 
       if (me) {
-        setDrawingEnabled(
-          Boolean(me.drawing)
-        );
+        setDrawingEnabled(Boolean(me.drawing));
       } else {
         setDrawingEnabled(false);
       }
 
       list.forEach((player, i) => {
-        const el = createEl(
-          "div",
-          "player"
-        );
+        const el = createEl("div", "player");
 
         if (i % 2 === 0) {
           el.classList.add("odd");
@@ -870,21 +839,11 @@
           el.classList.add("admin");
         }
 
-        const bg = createEl(
-          "div",
-          "player-background"
-        );
+        const bg = createEl("div", "player-background");
 
-        const info = createEl(
-          "div",
-          "player-info"
-        );
+        const info = createEl("div", "player-info");
 
-        const name = createEl(
-          "div",
-          "player-name",
-          player.name || "Player"
-        );
+        const name = createEl("div", "player-name", player.name || "Player");
 
         if (player.me) {
           name.classList.add("me");
@@ -893,48 +852,28 @@
         const score = createEl(
           "div",
           "player-score",
-          String(
-            player.score != null
-              ? player.score
-              : 0
-          )
+          String(player.score != null ? player.score : 0),
         );
 
         info.appendChild(name);
         info.appendChild(score);
 
-        const avatarWrap = createEl(
-          "div",
-          "player-avatar-container"
-        );
+        const avatarWrap = createEl("div", "player-avatar-container");
 
-        const avatar = createEl(
-          "div",
-          "avatar"
-        );
+        const avatar = createEl("div", "avatar");
 
-        const color = createEl(
-          "div",
-          "color"
-        );
+        const color = createEl("div", "color");
 
-        color.style.backgroundColor =
-          player.color || "#4571ff";
+        color.style.backgroundColor = player.color || "#4571ff";
 
         color.style.borderRadius = "4px";
 
         avatar.appendChild(color);
 
         if (player.drawing) {
-          const pen = createEl(
-            "div",
-            "drawing"
-          );
+          const pen = createEl("div", "drawing");
 
-          pen.style.backgroundImage =
-            "url(" +
-            imgUrl("pen.gif") +
-            ")";
+          pen.style.backgroundImage = "url(" + imgUrl("pen.gif") + ")";
 
           avatar.appendChild(pen);
         }
@@ -950,49 +889,36 @@
     },
 
     chat_add(data) {
-      const p =
-        document.createElement("p");
+      const p = document.createElement("p");
 
-      const name =
-        document.createElement("b");
+      const name = document.createElement("b");
 
-      name.textContent =
-        (data.name || "Player") +
-        ": ";
+      name.textContent = (data.name || "Player") + ": ";
 
       p.appendChild(name);
 
-      const span =
-        document.createElement("span");
+      const span = document.createElement("span");
 
-      span.textContent =
-        data.text || "";
+      span.textContent = data.text || "";
 
       p.appendChild(span);
 
-      const chatType =
-        (data.chatType || "base")
-          .toLowerCase();
+      const chatType = (data.chatType || "base").toLowerCase();
 
       if (chatType === "guessed") {
         p.classList.add("guessed");
       }
 
-      p.style.color =
-        CHAT_TYPES[chatType] ||
-        CHAT_TYPES.base;
+      p.style.color = CHAT_TYPES[chatType] || CHAT_TYPES.base;
 
       chatContent.appendChild(p);
 
-      chatContent.scrollTop =
-        chatContent.scrollHeight;
+      chatContent.scrollTop = chatContent.scrollHeight;
 
       if (data.bubble !== false) {
-        const bubbleHost =
-          $("#game-canvas .bubbles");
+        const bubbleHost = $("#game-canvas .bubbles");
 
-        const bubble =
-          p.cloneNode(true);
+        const bubble = p.cloneNode(true);
 
         bubbleHost.appendChild(bubble);
 
@@ -1008,47 +934,32 @@
 
     guess_input(data) {
       chatForms.forEach((form) => {
-        const input =
-          form.querySelector("input");
+        const input = form.querySelector("input");
 
         if (data.enabled != null) {
-          input.disabled =
-            !data.enabled;
+          input.disabled = !data.enabled;
         }
 
         if (data.placeholder != null) {
-          input.placeholder =
-            data.placeholder;
+          input.placeholder = data.placeholder;
         }
 
-        form.style.display =
-          data.visible === false
-            ? "none"
-            : "";
+        form.style.display = data.visible === false ? "none" : "";
       });
     },
 
     rate(data) {
-      rateEl.style.display =
-        data.visible
-          ? "block"
-          : "none";
+      rateEl.style.display = data.visible ? "block" : "none";
     },
 
     loading(data) {
-      loadEl.style.display =
-        data.show
-          ? "block"
-          : "none";
+      loadEl.style.display = data.show ? "block" : "none";
     },
 
     handle(data) {
       const action = data.action;
 
-      if (
-        action &&
-        typeof GameUI[action] === "function"
-      ) {
+      if (action && typeof GameUI[action] === "function") {
         GameUI[action](data);
       }
     },
@@ -1057,24 +968,14 @@
   window.GameUI = GameUI;
 
   function connectSocket(roomName) {
-    const protocol =
-      window.location.protocol === "https:"
-        ? "wss:"
-        : "ws:";
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
 
     socket = new WebSocket(
-      protocol +
-        "//" +
-        window.location.host +
-        "/ws/board/" +
-        roomName +
-        "/"
+      protocol + "//" + window.location.host + "/ws/board/" + roomName + "/",
     );
 
     socket.onopen = function () {
-      console.log(
-        "WebSocket connected"
-      );
+      console.log("WebSocket connected");
     };
 
     socket.onmessage = function (e) {
@@ -1092,7 +993,10 @@
         drawLine(data.payload);
         return;
       }
-
+      if (data.type === "clear") {
+        clearCanvas();
+        return;
+      }
       /*
        * UI message:
        *
@@ -1107,19 +1011,13 @@
         return;
       }
 
-      if (
-        typeof GameUI[data.type] === "function"
-      ) {
+      if (typeof GameUI[data.type] === "function") {
         GameUI[data.type](data);
       }
     };
 
     socket.onclose = function (event) {
-      console.error(
-        "WebSocket closed:",
-        event.code,
-        event.reason
-      );
+      console.error("WebSocket closed:", event.code, event.reason);
 
       /*
        * If socket closes, drawing should
@@ -1129,10 +1027,7 @@
     };
 
     socket.onerror = function (error) {
-      console.error(
-        "WebSocket error:",
-        error
-      );
+      console.error("WebSocket error:", error);
 
       setDrawingEnabled(false);
     };
@@ -1151,16 +1046,10 @@
     // so a resize needs no JS. Re-assigning canvas.width/height here is
     // what used to erase the drawing.
 
-    const roomScript =
-      document.getElementById(
-        "room_name"
-      );
+    const roomScript = document.getElementById("room_name");
 
     if (roomScript) {
-      const roomName =
-        JSON.parse(
-          roomScript.textContent
-        );
+      const roomName = JSON.parse(roomScript.textContent);
 
       connectSocket(roomName);
     }
@@ -1186,13 +1075,8 @@
     });
   }
 
-  if (
-    document.readyState === "loading"
-  ) {
-    document.addEventListener(
-      "DOMContentLoaded",
-      init
-    );
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
   } else {
     init();
   }

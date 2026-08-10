@@ -17,6 +17,7 @@ class ReceiveHandler:
             "draw": self.draw,
             "guess": self.guess,
             "word_choice": self.word_choice,
+            "clear":self.clear_canvas
         }
 
         handler = handlers.get(message.get("type"))
@@ -31,14 +32,14 @@ class ReceiveHandler:
         else:
             logger.info(f"it is not your turn!{player}")
         
-    async def guess(self, message, channel_layer, player, room):
+    async def guess(self, message, channel_layer, player, room):# player is the channel_name
         if player == await self.storage.get_drawer(room):
             logger.warning("you are drawer u cant guess!")
             return 
         
         guess = message.get("text")
         name = await self.storage.get_name(room, player)
-        await self.game_manager.guess_handler(room, guess, name)
+        await self.game_manager.guess_handler(room, guess, name, player)
      
 
     async def word_choice(self, message, channel_layer, player, room):
@@ -46,5 +47,6 @@ class ReceiveHandler:
         await self.storage.set_choosed_word(room, word)
         await self.game_manager.start_draw_handler(room)
 
-
+    async def clear_canvas(self, message, channel_layer, player, room):
+        await self.game_manager.clear_canvas(room)
     
