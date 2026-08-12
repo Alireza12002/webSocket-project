@@ -30,6 +30,9 @@ class GameManager:
 
         if len(players) == 4:
             asyncio.create_task(self.delayed_start(room))
+            return
+        for player in players.keys():
+            await self.send.overlay_wait(player, "Wait until 4 player join!")
 
     async def handle_leave(self, room_name, name):
         await self.update_players(room_name)
@@ -47,11 +50,17 @@ class GameManager:
     async def start_round(self, room_name):
         await self.storage.make_turn_order(room_name)
         room = await self.storage.get_room(room_name)
-
-        if room["round"] == 4:
-            return  # show sccores
-
         room["round"] += 1
+        if room["round"] > 2:
+            winner_name = await self.choose_winner(room_name)
+            await self.send.overlay_winner(room_name, winner_name)
+            await asyncio.sleep(5)
+            room["round"] = 0
+            await self.storage.save_room(room_name, room)
+            await self.start_game(room_name)
+            return
+
+        
         await self.send.set_round(room_name, room["round"])
         await self.storage.save_room(room_name, room)
         await self.start_turn(room_name)
@@ -84,8 +93,11 @@ class GameManager:
                 await self.send.overlay_wait(player, "Wait for drawer to choose...")
 
     async def end_turn(self, room_name):
+        await self.reveal_the_word(room_name)
+        await asyncio.sleep(3)
         await self.score_board(room_name)
-        await asyncio.sleep(5)
+        await asyncio.sleep(3)
+        
         await self.start_turn(room_name)
 
     # Game state manager helpers
@@ -137,7 +149,7 @@ class GameManager:
             await self.storage.save_room(room_name, room)
             await self.check_all_guess(room_name)
             return
-            # true guessed
+          
         await self.send.base_chat(room_name, name, guess)
 
     # Other helpers
@@ -153,7 +165,7 @@ class GameManager:
 
     async def update_players(self, room_name):
         room = await self.storage.get_room(room_name)
-        players = room["players"]  # Keep as dict with channel_name keys
+        players = room["players"]
         await self.send.send_players(room_name, players)
 
     async def clear_canvas(self, room_name, player):
@@ -176,7 +188,7 @@ class GameManager:
         await self.send.score_board(room_name, players_data)
 
     async def start_timer(self, room_name):
-        seconds = 10
+        seconds = 5
 
         async def countdown():
             try:
@@ -203,3 +215,21 @@ class GameManager:
     async def choose_random_word(self):
         options = random.sample(self.words, k=3)
         return options
+
+    async def reveal_the_word(self, room_name):
+        word = await self.storage.get_word(room_name)
+        await self.send.overlay_reveal(room_name, word)
+
+    async def choose_winner(self, room_name):
+        players = await self.storage.get_players(room_name)
+        players = players.values()
+        score = 0
+
+        for player in players:
+            if player["score"] > score:
+                score = player["score"]
+                winner = player["name"]
+
+        return winner
+
+        

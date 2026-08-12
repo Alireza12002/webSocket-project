@@ -73,3 +73,9 @@ class SendHandler():
 
     async def player_drawing_chat(self, room_name, drawer_name):
         await self.channel_layer.group_send(room_name, {"type":"player_drawing", "name":drawer_name})
+
+    async def overlay_reveal(self, room_name, word):
+        await self.channel_layer.group_send(room_name, {"type":"overlay_reveal", "word":word})
+
+    async def overlay_winner(self, room_name, winner):
+        await self.channel_layer.group_send(room_name, {"type":"overlay_winner", "name":winner})

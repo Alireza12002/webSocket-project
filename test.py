@@ -41,8 +41,6 @@
 #         await self.send(json.dumps({"type": "online_count", "count": count}))
 
 
-
-
 #     async def matchmaker(self):
 #         self.player = self.channel_name
 #         rooms = await redis.smembers("rooms")
@@ -52,13 +50,38 @@
 #             if await redis.scard(room) < 4:
 #                 await self.channel_layer.group_add(room, self.player)
 #                 await redis.sadd(room, self.player)
-#                 return 
+#                 return
 
 #         new_room = uuid4().hex
 #         await redis.sadd("rooms", new_room)
 #         await self.channel_layer.group_add(new_room, self.player)
 #         await redis.sadd(new_room, self.player)
-             
-ali = "alireza"
-ali = "_"*len(ali)
-print(ali)
+
+# ali = "alireza"
+# ali = "_"*len(ali)
+# print(ali)
+
+players = {
+    "channel_1": {
+        "name": "ali",
+        "score": 100
+    },
+    "channel_2": {
+        "name": "reza",
+        "score": 100
+    },
+    "channel_3": {
+        "name": "mohammad",
+        "score": 100
+    },
+}
+
+players = players.values()
+score = 0
+
+for player in players:
+    if player["score"] > score:
+        score = player["score"]
+        winner = player["name"]
+
+print(winner)
