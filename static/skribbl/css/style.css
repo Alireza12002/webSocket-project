@@ -3617,6 +3617,8 @@ html[data-halloween] #game-logo a img {
     font-weight:bold;
 
     margin-bottom:20px;
+
+    color: #000;
 }
 
 .score-row{
@@ -3647,6 +3649,8 @@ html[data-halloween] #game-logo a img {
 .score-row .name{
 
     flex:1;
+
+    
 }
 
 .score-row .score{

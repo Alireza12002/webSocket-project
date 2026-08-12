@@ -48,5 +48,5 @@ class ReceiveHandler:
         await self.game_manager.start_draw_handler(room)
 
     async def clear_canvas(self, message, channel_layer, player, room):
-        await self.game_manager.clear_canvas(room)
+        await self.game_manager.clear_canvas(room, player)
     

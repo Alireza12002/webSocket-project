@@ -970,8 +970,10 @@
   function connectSocket(roomName) {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
 
+    const username = sessionStorage.getItem("username")
+    console.log(username)
     socket = new WebSocket(
-      protocol + "//" + window.location.host + "/ws/board/" + roomName + "/",
+      `${protocol}//${window.location.host}/ws/board/${roomName}/?username=${encodeURIComponent(username)}`
     );
 
     socket.onopen = function () {
@@ -981,14 +983,6 @@
     socket.onmessage = function (e) {
       const data = JSON.parse(e.data);
 
-      /*
-       * Drawing received from server.
-       *
-       * IMPORTANT:
-       * This does NOT check canDraw because
-       * receiving a drawing is allowed for
-       * everyone.
-       */
       if (data.type === "draw") {
         drawLine(data.payload);
         return;
@@ -997,15 +991,7 @@
         clearCanvas();
         return;
       }
-      /*
-       * UI message:
-       *
-       * {
-       *   type: "ui",
-       *   action: "drawing",
-       *   enabled: true
-       * }
-       */
+
       if (data.type === "ui") {
         GameUI.handle(data);
         return;
@@ -1019,10 +1005,6 @@
     socket.onclose = function (event) {
       console.error("WebSocket closed:", event.code, event.reason);
 
-      /*
-       * If socket closes, drawing should
-       * immediately become disabled.
-       */
       setDrawingEnabled(false);
     };
 

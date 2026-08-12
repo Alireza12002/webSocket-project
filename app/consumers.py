@@ -1,5 +1,6 @@
 import json
 import logging
+from urllib.parse import parse_qs
 from app.game_manager.receive_handler import ReceiveHandler
 from app.game_manager.game_manager import GameManager
 from app.game_manager.match_making import MatchMaker
@@ -14,18 +15,28 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.match_maker = MatchMaker()
         self.game_manager = GameManager()
         self.receive_handler = ReceiveHandler()
-    async def connect(self):
-        await self.accept()
-        player_name = self.scope["session"].get("username")
-        self.room = await self.match_maker.join(self.channel_name, player_name)
-        session = self.scope["session"]
-        await self.channel_layer.group_add(self.room, self.channel_name)
-        await self.game_manager.join_handler(self.room)
 
-    async def disconnect(self, code):# need to work  
+
+    async def connect(self):
+        query_string = self.scope.get("query_string", b"").decode("utf-8")
+        query_params = parse_qs(query_string)
+        self.player_name = query_params.get("username", [None])[0]
+
+        if not self.player_name:
+            print("--> REJECTED: player_name is missing/empty")
+            await self.close(code=4001)
+            return
+        
+        await self.accept()
+        self.room = await self.match_maker.join(self.channel_name, self.player_name)
+        await self.channel_layer.group_add(self.room, self.channel_name)
+        await self.game_manager.join_handler(self.room, self.player_name)
+
+
+    async def disconnect(self, code):
         await self.channel_layer.group_discard(self.room, self.channel_name)
         await self.match_maker.leave(player=self.channel_name, room_name=self.room)
-        await self.game_manager.handle_leave(self.room,)
+        await self.game_manager.handle_leave(self.room,self.player_name)
 
 
     async def receive(self, text_data=None, bytes_data=None):
@@ -73,3 +84,18 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def clear_canvas(self, event):
         await self.send(json.dumps({"type":"clear"}))
+
+    async def score_board(self, event):
+        await self.send(json.dumps({"type":"ui", "action": "overlay", "show": True, "mode":"scoreboard", "players":event["scores"]}))
+
+    async def timer(self, event):
+        await self.send(json.dumps({"type":"ui", "action":"clock", "time":event["time"]}))
+
+    async def player_joined(self, event):
+        await self.send(json.dumps({"type":"chat_add", "name":event["name"], "text":f"{event["name"]} joined the game", "chatType":"join", "bubble":True}))
+
+    async def player_leaved(self, event):
+        await self.send(json.dumps({"type":"chat_add", "name":event["name"], "text":f"{event["name"]} leaved the game!", "chatType":"leave"}))
+
+    async def player_drawing(self, event):
+        await self.send(json.dumps({"type":"chat_add", "name":event["name"], "text":f"{event["name"]} is drawing!", "chatType":"drawing"}))

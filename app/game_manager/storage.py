@@ -122,3 +122,5 @@ class Storage:
     async def get_name(self, room_name, channel_name):
         room = await self.get_room(room_name)
         return room["players"][channel_name]["name"]
+
+    

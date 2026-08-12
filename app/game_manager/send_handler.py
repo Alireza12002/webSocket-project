@@ -1,9 +1,11 @@
+import asyncio
 from channels.layers import get_channel_layer
 from board.settings import CHANNEL_LAYERS
 from app.game_manager.storage import Storage
 
 class SendHandler():
-    channel_layer = get_channel_layer()
+    def __init__(self):
+        self.channel_layer = get_channel_layer()
 
     async def send_players(self, room_name, players):
         # Send to each player individually to avoid race condition with group_add
@@ -56,3 +58,18 @@ class SendHandler():
 
     async def clear_canvas(self, room_name):
         await self.channel_layer.group_send(room_name, {"type": "clear_canvas"})
+
+    async def score_board(self, room_name, scores: list):
+        await self.channel_layer.group_send(room_name, {"type": "score_board", "scores":scores})
+
+    async def round_timer(self, room_name, time):
+        await self.channel_layer.group_send(room_name, {"type":"timer", "time":time})
+
+    async def player_joined_chat(self, room_name, name):
+        await self.channel_layer.group_send(room_name, {"type":"player_joined", "name":name})
+
+    async def player_leaved_chat(self, room_name, name):
+        await self.channel_layer.group_send(room_name, {"type": "player_leaved", "name":name})
+
+    async def player_drawing_chat(self, room_name, drawer_name):
+        await self.channel_layer.group_send(room_name, {"type":"player_drawing", "name":drawer_name})
