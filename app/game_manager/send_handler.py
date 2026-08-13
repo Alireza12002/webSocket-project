@@ -41,6 +41,9 @@ class SendHandler():
     async def turn_on_toolbar(self, drawer):
         await self.channel_layer.send(drawer, {"type": "turn_on_toolbar"})
 
+    async def turn_off_toolbar(self, drawer):
+        await self.channel_layer.send(drawer, {"type": "turn_off_toolbar"})
+
     async def clear_chat(self, room_name):
         await self.channel_layer.group_send(room_name, {"type":"clear_chat"})
 

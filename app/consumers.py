@@ -104,4 +104,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         await self.send(json.dumps({"type":"ui", "action":"overlay", "show":True, "mode":"reveal", "word":event["word"], "reason":""}))
 
     async def overlay_winner(self, event):
-        await self.send(json.dumps({"type":"ui", "action":"overlay", "show":True, "mode":"result", "winnerName":event["name"], "winnerText":f"{event["name"]} won the game!!!"}))
+        await self.send(json.dumps({"type":"ui", "action":"overlay", "show":True, "mode":"result", "winnerName":event["name"], "winnerText":"won the game!!!"}))
+
+    async def turn_off_toolbar(self, event):
+        await self.send(json.dumps({"type":"ui", "action":"toolbar", "visible": False}))

@@ -26,3 +26,6 @@ class MatchMaker():
         room = await self.storage.get_room(room_name)
         room["players"].pop(player)
         await self.storage.save_room(room_name, room)
+        players = await self.storage.get_players(room_name)
+        if players.keys() == 0:
+            self.storage.remove_room(room_name)

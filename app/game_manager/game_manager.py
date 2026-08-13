@@ -3,6 +3,7 @@ from app.game_manager.storage import Storage
 import random
 import asyncio
 
+GAME_TIMERS = {}
 
 class GameManager:
     words = ["Apple", "Bicycle", "Cactus", "Diamond", "Envelope",
@@ -19,7 +20,6 @@ class GameManager:
     def __init__(self):
         self.storage = Storage()
         self.send = SendHandler()
-        self.timers = {}
 
     # Join and leave manager Functions
 
@@ -93,6 +93,12 @@ class GameManager:
                 await self.send.overlay_wait(player, "Wait for drawer to choose...")
 
     async def end_turn(self, room_name):
+        await self.update_players(room_name)
+        players = await self.storage.get_players(room_name)
+        for player in players.keys():
+            await self.clear_canvas(room_name, player)
+            await self.send.turn_off_toolbar(await self.storage.get_drawer(room_name))
+
         await self.reveal_the_word(room_name)
         await asyncio.sleep(3)
         await self.score_board(room_name)
@@ -103,9 +109,9 @@ class GameManager:
     # Game state manager helpers
     async def player_turn_manager(self, room_name):
         room = await self.storage.get_room(room_name)
-        room["turn_index"] += 1
+        room["turn_index"] -= 1
 
-        if room["turn_index"] == 4:
+        if room["turn_index"] == 0:
             await self.storage.make_turn_order(room_name)
             return "next_round"
 
@@ -155,13 +161,14 @@ class GameManager:
     # Other helpers
     async def check_all_guess(self, room_name):
         players = await self.storage.get_players(room_name)
-        await self.stop_timer(room_name)
+        await self.stop_timer(room_name) # not working
         counter = 0
         for player in players.values():
             if player["guessed"] == True:
                 counter += 1
         if counter == 3:
-            await self.end_turn(room_name)
+            await self.stop_timer(room_name)
+            asyncio.create_task(self.end_turn(room_name))
 
     async def update_players(self, room_name):
         room = await self.storage.get_room(room_name)
@@ -188,7 +195,7 @@ class GameManager:
         await self.send.score_board(room_name, players_data)
 
     async def start_timer(self, room_name):
-        seconds = 5
+        seconds = 25
 
         async def countdown():
             try:
@@ -205,12 +212,16 @@ class GameManager:
             except asyncio.CancelledError:
                 pass
 
-        self.timers[room_name] = asyncio.create_task(countdown())
+        await self.stop_timer(room_name)
+
+        GAME_TIMERS[room_name] = asyncio.create_task(countdown())
 
     async def stop_timer(self, room_name):
-        timer = self.timers.get(room_name)
+        timer = GAME_TIMERS.get(room_name)
         if timer:
             timer.cancel()
+
+            del GAME_TIMERS[room_name]
 
     async def choose_random_word(self):
         options = random.sample(self.words, k=3)

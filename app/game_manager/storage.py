@@ -99,7 +99,7 @@ class Storage:
         room = await self.get_room(room_name)
         players = await self.get_players(room_name)
         room["turn_order"] = list(players.keys())
-        room["turn_index"] = -1
+        room["turn_index"] = 4
         await self.save_room(room_name, room)
 
     async def set_choosed_word(self, room_name, word):
@@ -123,4 +123,11 @@ class Storage:
         room = await self.get_room(room_name)
         return room["players"][channel_name]["name"]
 
-    
+    async def remove_room(self, room_name):
+        await redis.srem("rooms", room_name)
+
+    async def store_timer(self, room_name):
+        await redis.sadd("timers", room_name)
+
+    async def get_timer(self, room_name):
+        pass
