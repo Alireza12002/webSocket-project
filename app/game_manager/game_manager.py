@@ -195,7 +195,7 @@ class GameManager:
         await self.send.score_board(room_name, players_data)
 
     async def start_timer(self, room_name):
-        seconds = 25
+        seconds = 60
 
         async def countdown():
             try:
