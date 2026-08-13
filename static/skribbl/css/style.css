@@ -59,14 +59,14 @@
   position: absolute;
   width: 100%;
   height: 100%;
-  /* background: url(../img/stars.png); */
+
   background-repeat: repeat;
 }
 .background-wave {
   position: absolute;
   width: 100%;
   height: 100%;
-  /* background: url(../img/wave.gif); */
+
   background-size: contain;
   background-repeat: repeat-x;
   opacity: 0.5;
@@ -104,7 +104,7 @@
   position: absolute;
   width: calc(var(--UNIT) / 3);
   height: calc(var(--UNIT) / 3);
-  /* background: url(../img/bubble.gif); */
+
   background-size: contain;
   opacity: 0.5;
 }
@@ -230,21 +230,21 @@
   position: absolute;
   width: 100%;
   height: 100%;
-  background-image: url(../img/avatar/color_atlas.gif);
+
   background-size: 1000% 1000%;
 }
 .avatar .eyes {
   position: absolute;
   width: 100%;
   height: 100%;
-  background-image: url(../img/avatar/eyes_atlas.gif);
+
   background-size: 1000% 1000%;
 }
 .avatar .mouth {
   position: absolute;
   width: 100%;
   height: 100%;
-  background-image: url(../img/avatar/mouth_atlas.gif);
+
   background-size: 1000% 1000%;
 }
 .avatar .special {
@@ -253,7 +253,7 @@
   top: -33%;
   width: 166%;
   height: 166%;
-  background-image: url(../img/avatar/special_atlas.gif);
+
   background-size: 1000% 1000%;
 }
 .avatar .owner {
@@ -263,7 +263,7 @@
   left: -5%;
   top: -22%;
   z-index: 2;
-  background-image: url(../img/crown.gif);
+
   background-position: center;
   background-size: contain;
 }
@@ -637,13 +637,11 @@ input[type="checkbox"]:checked::before {
   width: 100%;
   height: 100%;
   background-size: contain;
-  background-image: url(../img/audio.gif);
+
   transition: transform 70ms ease;
   filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.3));
 }
-#audio.off .icon {
-  background-image: url(../img/audio_off.gif);
-}
+
 #audio:hover .icon {
   transform: scale(1.2);
 }
@@ -659,12 +657,10 @@ input[type="checkbox"]:checked::before {
   width: 100%;
   height: 100%;
   background-size: contain;
-  background-image: url(../img/bulb.gif);
   transition: transform 70ms ease;
   filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.3));
 }
 #lightbulb.off .icon {
-  background-image: url(../img/bulb_off.gif);
 }
 #lightbulb:hover .icon {
   transform: scale(1.2);
@@ -681,12 +677,12 @@ input[type="checkbox"]:checked::before {
   width: 100%;
   height: 100%;
   background-size: contain;
-  background-image: url(../img/key.gif);
+
   transition: transform 70ms ease;
   filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.3));
 }
 #hotkeys.off .icon {
-  background-image: url(../img/key.gif);
+
 }
 #hotkeys:hover .icon {
   transform: scale(1.2);
@@ -795,7 +791,7 @@ html[data-theme="dark"] {
   --COLOR_PLAYER_BG_GUESSED_ALT: rgba(2, 97, 48, 0.75);
 }
 html[data-theme="dark"] body {
-  background-image: url(../img/background_dark.png);
+
 }
 html[data-theme="dark"] #game-players .player .icons .icon {
   filter: invert(1);
@@ -844,7 +840,6 @@ canvas.snow {
   filter: drop-shadow(0 0 4px #000);
 }
 body .snow {
-  background-image: url(../img/snow.gif);
   position: fixed;
   top: 0;
   left: 0;
@@ -907,7 +902,6 @@ body .snow {
   position: absolute;
   display: flex;
   align-items: center;
-  background-image: url(../img/info.gif);
   right: 8px;
   top: 8px;
   width: 32px;
@@ -1114,10 +1108,8 @@ body .snow {
   animation: icon_introduce 0.21s ease-in-out;
 }
 #game-players .player .player-icons .icon.owner {
-  background-image: url(../img/owner.gif);
 }
 #game-players .player .player-icons .icon.muted {
-  background-image: url(../img/mute.gif);
 }
 #game-players .player .player-icons .icon.visible {
   display: block;
@@ -1808,7 +1800,6 @@ form.chat-form input {
   width: 100%;
   height: 100%;
   left: 50%;
-  background-image: url(../img/trophy.gif);
   background-size: cover;
   filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.25));
 }
@@ -2769,7 +2760,6 @@ form.chat-form input {
   right: 4px;
   top: 4px;
   opacity: 0.6;
-  background-image: url(../img/randomize.gif);
   transition:
     opacity 0.15s ease,
     transform 0.15s ease;
@@ -2793,7 +2783,6 @@ form.chat-form input {
   cursor: pointer;
   width: 34px;
   height: 34px;
-  background-image: url(../img/arrow.gif);
   background-size: 200%;
   background-repeat: no-repeat;
 }
@@ -2993,18 +2982,7 @@ form.chat-form input {
   background-size: contain;
   filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.3));
 }
-#modal .modal-container-settings .group .title .icon.hotkeys {
-  background-image: url(../img/key.gif);
-}
-#modal .modal-container-settings .group .title .icon.misc {
-  background-image: url(../img/questionmark.gif);
-}
-#modal .modal-container-settings .group .title .icon.volume {
-  background-image: url(../img/audio.gif);
-}
-#modal .modal-container-settings .group .title .icon.volume.muted {
-  background-image: url(../img/audio_off.gif);
-}
+
 #modal .modal-container-settings .group .item {
   margin-bottom: 0.5em;
 }
@@ -3581,13 +3559,12 @@ html[data-halloween] {
   --COLOR_TOOL_TIP_BG: #a843f5;
 }
 html[data-halloween] body {
-  background-image: url(../img/background_halloween.png);
 }
 html[data-halloween] #home .logo-big img {
-  content: url(../img/logo_halloween.gif);
+  
 }
 html[data-halloween] #game-logo a img {
-  content: url(../img/logo_halloween.gif);
+ 
 }
 .scoreboard {
 
