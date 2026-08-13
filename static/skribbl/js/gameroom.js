@@ -967,14 +967,30 @@
 
   window.GameUI = GameUI;
 
-  function connectSocket(roomName) {
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+ function connectSocket(roomName) {
+    const protocol =
+        window.location.protocol === "https:" ? "wss:" : "ws:";
 
-    const username = sessionStorage.getItem("username")
-    console.log(username)
+    const username = sessionStorage.getItem("username");
+
+    console.log("Username:", username);
+
     socket = new WebSocket(
-      `${protocol}//${window.location.host}/ws/board/${roomName}/?username=${encodeURIComponent(username)}`
+        `${protocol}//${window.location.host}/ws/board/${roomName}/?username=${encodeURIComponent(username)}`
     );
+
+    socket.onopen = () => {
+        console.log("WebSocket connected");
+    };
+
+    socket.onclose = (event) => {
+        console.log("WebSocket closed:", event.code);
+    };
+
+    socket.onerror = (error) => {
+        console.error("WebSocket error:", error);
+    };
+
 
     socket.onopen = function () {
       console.log("WebSocket connected");
